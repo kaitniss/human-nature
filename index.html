@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Интерактивный дашборд о близнецовых исследованиях и биполярном аффективном расстройстве.">
+  <title>Близнецы и БАР — интерактивный дашборд</title>
+  <style>
+    :root {
+      --bg: #faf8f5;
+      --navy: #1a2332;
+      --teal: #2a9d8f;
+      --coral: #e76f51;
+      --strip: #ebf4f8;
+      --body: #2d3748;
+      --muted: #718096;
+      --card: #fff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 28px;
+      color: var(--body);
+      background: var(--bg);
+      font-family: Inter, "Open Sans", Roboto, system-ui, sans-serif;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      color: var(--navy);
+      text-align: center;
+      font-size: 30px;
+    }
+
+    .sub {
+      margin: 0 0 6px;
+      color: var(--navy);
+      text-align: center;
+      font-size: 16px;
+    }
+
+    .gloss {
+      margin-bottom: 18px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .legend {
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      margin: 0 4px 0 14px;
+      border-radius: 50%;
+      vertical-align: middle;
+    }
+
+    .dot.t {
+      background: var(--teal);
+    }
+
+    .dot.c {
+      background: var(--coral);
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .tab {
+      padding: 10px 16px;
+      border: 2px solid var(--navy);
+      border-radius: 30px;
+      color: var(--navy);
+      background: #fff;
+      cursor: pointer;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      transition: transform 0.2s, background 0.2s, color 0.2s;
+    }
+
+    .tab:hover,
+    .tab:focus-visible {
+      transform: translateY(-2px);
+    }
+
+    .tab:focus-visible {
+      outline: 3px solid var(--coral);
+      outline-offset: 2px;
+    }
+
+    .tab.active {
+      color: #fff;
+      background: var(--navy);
+    }
+
+    .panel {
+      display: none;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 26px;
+      border-radius: 16px;
+      background: var(--card);
+      box-shadow: 0 6px 22px rgb(0 0 0 / 8%);
+    }
+
+    .panel.active {
+      display: block;
+      animation: fade 0.3s ease;
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .eyebrow {
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .title {
+      margin: 4px 0 8px;
+      color: var(--navy);
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .q {
+      margin-bottom: 18px;
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .track {
+      position: relative;
+      height: 34px;
+      overflow: hidden;
+      margin: 12px 0;
+      border-radius: 8px;
+      background: #eef1f4;
+    }
+
+    .fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      height: 100%;
+      padding-left: 12px;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      transition: width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .fill.t {
+      background: var(--teal);
+    }
+
+    .fill.c {
+      background: var(--coral);
+    }
+
+    .scale {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .num {
+      margin: 6px 0;
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    .num.t {
+      color: var(--teal);
+    }
+
+    .num.c {
+      color: var(--coral);
+    }
+
+    .take {
+      margin-top: 14px;
+      color: var(--navy);
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .cap {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .play {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      background: var(--strip);
+    }
+
+    .play label {
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--teal);
+    }
+
+    .scatter {
+      position: relative;
+      height: 150px;
+      margin-top: 10px;
+      border: 1px solid #cfd8e3;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .pt {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--navy);
+      transform: translate(-50%, -50%);
+    }
+
+    .rlabel {
+      margin-top: 8px;
+      color: var(--navy);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .hbar {
+      display: flex;
+      height: 40px;
+      overflow: hidden;
+      margin-top: 14px;
+      border-radius: 8px;
+    }
+
+    .hgen,
+    .henv {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    .hgen {
+      color: #fff;
+      background: var(--teal);
+      font-size: 14px;
+    }
+
+    .henv {
+      color: var(--navy);
+      background: #cbd5e0;
+      font-size: 13px;
+    }
+
+    .line {
+      position: relative;
+      height: 70px;
+      margin: 26px 0;
+    }
+
+    .axis {
+      position: absolute;
+      top: 40px;
+      right: 0;
+      left: 0;
+      height: 2px;
+      background: var(--navy);
+    }
+
+    .thr {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 2px;
+      height: 48px;
+      background: var(--coral);
+    }
+
+    .thr span {
+      position: absolute;
+      top: -18px;
+      left: -38px;
+      width: 90px;
+      color: var(--coral);
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .examdot {
+      position: absolute;
+      top: 34px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--navy);
+      transform: translateX(-50%);
+    }
+
+    .examdot span {
+      position: absolute;
+      top: 14px;
+      left: -28px;
+      width: 70px;
+      color: var(--navy);
+      text-align: center;
+      font-size: 11px;
+    }
+
+    .tick {
+      position: absolute;
+      top: 44px;
+      color: var(--muted);
+      font-size: 10px;
+      transform: translateX(-50%);
+    }
+
+    .warn,
+    .ok {
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .warn {
+      border-left: 4px solid var(--coral);
+      background: #fff6f2;
+    }
+
+    .ok {
+      border-left: 4px solid var(--teal);
+      background: #eefaf7;
+    }
+
+    .foot {
+      margin-top: 22px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 18px 12px;
+      }
+
+      h1 {
+        font-size: 25px;
+      }
+
+      .panel {
+        padding: 20px 16px;
+      }
+
+      .title {
+        font-size: 21px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Близнецы и БАР: что означают цифры</h1>
+    <p class="sub">Три показателя — три разных вопроса. Нажимай на вкладки и элементы.</p>
+    <p class="gloss">БАР — биполярное аффективное расстройство</p>
+
+    <div class="legend" aria-label="Обозначения близнецов">
+      <span class="dot t"></span>MZ — однояйцевые близнецы
+      <span class="dot c"></span>DZ — разнояйцевые близнецы
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Разделы дашборда">
+      <button class="tab active" id="tab-bar" type="button" role="tab" aria-selected="true" aria-controls="bar" data-p="bar">🧠 Что такое БАР</button>
+      <button class="tab" id="tab-conc" type="button" role="tab" aria-selected="false" aria-controls="conc" data-p="conc">1 · Конкордантность</button>
+      <button class="tab" id="tab-corr" type="button" role="tab" aria-selected="false" aria-controls="corr" data-p="corr">2 · Корреляция</button>
+      <button class="tab" id="tab-herit" type="button" role="tab" aria-selected="false" aria-controls="herit" data-p="herit">3 · Наследуемость</button>
+      <button class="tab" id="tab-exam" type="button" role="tab" aria-selected="false" aria-controls="exam" data-p="exam">🎯 Пример с экзаменом</button>
+    </div>
+
+    <section class="panel active" id="bar" role="tabpanel" aria-labelledby="tab-bar">
+      <div class="eyebrow">Понятие</div>
+      <div class="title">БАР — биполярное аффективное расстройство</div>
+      <p class="q">Психическое расстройство с чередованием фаз: подъёмы настроения и энергии (мания/гипомания) и спады (депрессия). В этом дашборде речь о БАР I типа.</p>
+      <div class="ok">Зачем близнецы? Сравнивая MZ (гены почти 100% общие) и DZ (в среднем 50% общих), исследователи пытаются разделить вклад генов и среды.</div>
+      <p class="cap" style="margin-top: 14px;">Дальше три вкладки показывают три РАЗНЫХ вопроса об одном и том же явлении — не путай их между собой.</p>
+    </section>
+
+    <section class="panel" id="conc" role="tabpanel" aria-labelledby="tab-conc" hidden>
+      <div class="eyebrow">1. Конкордантность</div>
+      <div class="title">Совпадает ли диагноз?</div>
+      <p class="q">Если у одного близнеца есть БАР, как часто он есть и у второго?</p>
+      <div class="scale"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+      <div class="track"><div class="fill t" id="f1">MZ · 43%</div></div>
+      <div class="track"><div class="fill c" id="f2">DZ · 6%</div></div>
+      <div class="take">Считаем совпадение заболевания.</div>
+      <div class="cap">Пробандная конкордантность. (Нажми на вкладку ещё раз, чтобы пересмотреть анимацию.)</div>
+    </section>
+
+    <section class="panel" id="corr" role="tabpanel" aria-labelledby="tab-corr" hidden>
+      <div class="eyebrow">2. Корреляция</div>
+      <div class="title">Связана ли предрасположенность?</div>
+      <p class="q">Если она выше у одного, обычно ли она выше и у второго?</p>
+      <div class="num t">MZ · r = 0,85</div>
+      <div class="num c">DZ · r = 0,41</div>
+      <div class="warn"><b>0,85 ≠ 85% совпавших диагнозов.</b> Корреляция — это не доля и не вероятность болезни.</div>
+
+      <div class="play">
+        <label for="rslider">Поиграй: двигай ползунок r и смотри, как «кучнеют» точки пар близнецов</label>
+        <input type="range" id="rslider" min="0" max="100" value="85">
+        <div class="rlabel" id="rval">r = 0,85</div>
+        <div class="scatter" id="scatter" aria-label="Симуляция корреляции"></div>
+        <p class="cap">Ближе к +1 — сильнее положительная связь: выше у одного → обычно выше у второго.</p>
+      </div>
+      <div class="cap">Предрасположенность оценивают моделью, а не измеряют напрямую.</div>
+    </section>
+
+    <section class="panel" id="herit" role="tabpanel" aria-labelledby="tab-herit" hidden>
+      <div class="eyebrow">3. Наследуемость</div>
+      <div class="title">Каков вклад генетических различий?</div>
+      <p class="q">В выбранной модели 93% различий в предрасположенности между людьми связаны с генетическими различиями.</p>
+      <div class="hbar">
+        <div class="hgen" style="width: 93%;">Гены · 93%</div>
+        <div class="henv" style="width: 7%;">7%</div>
+      </div>
+      <div class="take" style="font-size: 22px; margin-top: 16px;">h² = 0,93</div>
+      <div class="warn"><b>Это не личный риск заболеть.</b> h² описывает различия в ПОПУЛЯЦИИ, а не судьбу конкретного человека.</div>
+      <div class="cap">95%-й доверительный интервал: 69–100%. Оценка зависит от популяции и модели.</div>
+    </section>
+
+    <section class="panel" id="exam" role="tabpanel" aria-labelledby="tab-exam" hidden>
+      <div class="eyebrow">Аналогия</div>
+      <div class="title">Как связь может быть сильной, а результат — разным?</div>
+      <p class="q">Во многих парах: выше балл у одного → обычно выше у второго. Это корреляция. Но порог «сдал/не сдал» может их разделить.</p>
+      <div class="line">
+        <div class="axis"></div>
+        <div class="tick" style="left: 0%;">60</div>
+        <div class="tick" style="left: 25%;">65</div>
+        <div class="tick" style="left: 50%;">70</div>
+        <div class="tick" style="left: 75%;">75</div>
+        <div class="tick" style="left: 100%;">80</div>
+        <div class="thr"><span>Порог сдачи — 70</span></div>
+        <div class="examdot" style="left: 40%;"><span>68 — не сдал</span></div>
+        <div class="examdot" style="left: 60%;"><span>72 — сдал</span></div>
+      </div>
+      <div class="take">Баллы близкие. Итог «сдал / не сдал» не совпал.</div>
+      <div class="cap">В модели БАР предрасположенность может быть похожей, а диагноз — различаться. Пример условный.</div>
+    </section>
+  </main>
+
+  <p class="foot">
+    Источник: Kieseppä et al., 2004 · БАР I · doi:10.1176/ajp.161.10.1814<br>
+    Небольшая выборка: оценки имеют значительную неопределённость.
+  </p>
+
+  <script>
+    const tabs = document.querySelectorAll(".tab");
+    const panels = document.querySelectorAll(".panel");
+    const scatter = document.getElementById("scatter");
+    const slider = document.getElementById("rslider");
+
+    function drawScatter(r) {
+      scatter.replaceChildren();
+      const points = 40;
+
+      for (let i = 0; i < points; i += 1) {
+        const x = Math.random();
+        const noise = Math.random() - 0.5;
+        let y = r * (x - 0.5) + (1 - Math.abs(r)) * noise + 0.5;
+        y = Math.max(0.04, Math.min(0.96, y));
+
+        const dot = document.createElement("div");
+        dot.className = "pt";
+        dot.style.left = `${x * 90 + 5}%`;
+        dot.style.top = `${(1 - y) * 90 + 5}%`;
+        scatter.appendChild(dot);
+      }
+    }
+
+    function animateBars() {
+      const firstBar = document.getElementById("f1");
+      const secondBar = document.getElementById("f2");
+      firstBar.style.width = "0";
+      secondBar.style.width = "0";
+      window.setTimeout(() => {
+        firstBar.style.width = "43%";
+        secondBar.style.width = "6%";
+      }, 50);
+    }
+
+    function activateTab(tab) {
+      tabs.forEach((item) => {
+        const isActive = item === tab;
+        item.classList.toggle("active", isActive);
+        item.setAttribute("aria-selected", String(isActive));
+      });
+
+      panels.forEach((panel) => {
+        const isActive = panel.id === tab.dataset.p;
+        panel.classList.toggle("active", isActive);
+        panel.hidden = !isActive;
+      });
+
+      if (tab.dataset.p === "conc") {
+        animateBars();
+      }
+
+      if (tab.dataset.p === "corr") {
+        drawScatter(Number(slider.value) / 100);
+      }
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => activateTab(tab));
+    });
+
+    slider.addEventListener("input", () => {
+      const correlation = Number(slider.value) / 100;
+      document.getElementById("rval").textContent = `r = ${correlation.toFixed(2).replace(".", ",")}`;
+      drawScatter(correlation);
+    });
+
+    animateBars();
+  </script>
+</body>
+</html>
